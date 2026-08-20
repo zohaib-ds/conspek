@@ -194,6 +194,7 @@ function Video(props) {
   const src = props.src;
   const image = props.image;
   const className = props.className || "";
+  const hero = props.hero || false;
 
   return (
     <div
@@ -207,9 +208,60 @@ function Video(props) {
         muted
         loop
         playsInline
-        preload="metadata"
+        preload={hero ? "auto" : "none"}
+        poster={image}
         src={src}
       />
+
+      <div className="grain" />
+    </div>
+  );
+}
+
+function LazyVideo(props) {
+  const ref = useRef(null);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setLoaded(true);
+          observer.disconnect();
+        }
+      },
+      {
+        rootMargin: "800px 0px"
+      }
+    );
+
+    observer.observe(ref.current);
+
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      className="video"
+      style={{
+        backgroundImage: "url(" + props.image + ")"
+      }}
+    >
+      {loaded && (
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="auto"
+          poster={props.image}
+          src={props.src}
+        />
+      )}
+
       <div className="grain" />
     </div>
   );
@@ -521,7 +573,10 @@ function EngineeringVideoSection(props) {
       id={"service-" + item.number}
     >
       <div className="story-video">
-        <Video src={item.video} image={item.image} />
+        <LazyVideo
+          src={item.video}
+          image={item.image}
+        />
 
         <div className="video-number">{item.number}</div>
 
