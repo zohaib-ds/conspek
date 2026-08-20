@@ -11,25 +11,25 @@ const BUNNY_HOST = "https://vz-733160.b-cdn.net";
 
 const heroSlides = [
   {
-    video: `${BUNNY_HOST}/d655ca57-0720-4627-ab2b-9c200ad92544/play_720p.mp4`,
+    video: "https://player.mediadelivery.net/play/733160/d655ca57-0720-4627-ab2b-9c200ad92544",
     image: "/media/hero-01.jpg",
     eyebrow: "INTEGRATED INDUSTRIAL ENGINEERING",
     title: "ENGINEERING THE SYSTEMS BEHIND INDUSTRY."
   },
   {
-    video: `${BUNNY_HOST}/b5004eed-2608-40d6-8f4c-e6a9f3d5f20a/play_720p.mp4`,
+    video: "https://player.mediadelivery.net/play/733160/b5004eed-2608-40d6-8f4c-e6a9f3d5f20a",
     image: "/media/hero-02.jpg",
     eyebrow: "MECHANICAL ENGINEERING",
     title: "PRECISION THAT KEEPS PROCESSES MOVING."
   },
   {
-    video: `${BUNNY_HOST}/4ce4a52b-7200-430d-b68c-1f52c8ec48d4/play_720p.mp4`,
+    video: "https://player.mediadelivery.net/play/733160/4ce4a52b-7200-430d-b68c-1f52c8ec48d4",
     image: "/media/hero-03.jpg",
     eyebrow: "ELECTRICAL & INSTRUMENTATION",
     title: "CONTROL EVERY CRITICAL SIGNAL."
   },
   {
-    video: `${BUNNY_HOST}/f23c8448-d516-43f8-bdce-4973829f6fdd/play_720p.mp4`,
+    video: "https://player.mediadelivery.net/play/733160/f23c8448-d516-43f8-bdce-4973829f6fdd",
     image: "/media/hero-04.jpg",
     eyebrow: "EPC PROJECT DELIVERY",
     title: "FROM BLUEPRINT TO OPERATION."
@@ -39,7 +39,7 @@ const heroSlides = [
 const engineeringSections = [
   {
     number: "01",
-    video: `${BUNNY_HOST}/c7180fb9-df1b-4b23-8519-9dc68b4fbf1b/play_720p.mp4`,
+    video: "https://player.mediadelivery.net/play/733160/c7180fb9-df1b-4b23-8519-9dc68b4fbf1b",
     image: "/media/video-01.jpg",
     eyebrow: "ELECTRICAL & INSTRUMENTATION",
     title: "POWERING THE SYSTEM.",
@@ -48,7 +48,7 @@ const engineeringSections = [
   },
   {
     number: "02",
-    video: `${BUNNY_HOST}/5d2ee4a6-3918-45b9-9c12-78ee6c2e16fc/play_720p.mp4`,
+    video: "https://player.mediadelivery.net/play/733160/1814ed5e-b16c-4807-94d1-0a5bc2a59e9f",
     image: "/media/video-02.jpg",
     eyebrow: "MECHANICAL ENGINEERING",
     title: "BUILT AROUND PERFORMANCE.",
@@ -57,7 +57,7 @@ const engineeringSections = [
   },
   {
     number: "03",
-    video: `${BUNNY_HOST}/ffb2cd54-51ba-4708-bdf6-24da650db8b0/play_720p.mp4`,
+    video: "https://player.mediadelivery.net/play/733160/ffb2cd54-51ba-4708-bdf6-24da650db8b0",
     image: "/media/video-03.jpg",
     eyebrow: "EPC CONTRACTS",
     title: "FROM CONCEPT TO COMMISSIONING.",
@@ -66,7 +66,7 @@ const engineeringSections = [
   },
   {
     number: "04",
-    video: `${BUNNY_HOST}/1814ed5e-b16c-4807-94d1-0a5bc2a59e9f/play_720p.mp4`,
+    video: "https://player.mediadelivery.net/play/733160/5d2ee4a6-3918-45b9-9c12-78ee6c2e16fc",
     image: "/media/video-04.jpg",
     eyebrow: "DIGITAL & INDUSTRIAL TECHNOLOGY",
     title: "CONNECTING THE OPERATION.",
