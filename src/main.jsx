@@ -3,43 +3,60 @@ import { createRoot } from "react-dom/client";
 import { ArrowDown, ArrowUpRight, Menu, X } from "lucide-react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Hls from "hls.js";
 import "./styles.css";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const BUNNY_HOST = "https://vz-733160.b-cdn.net";
+
+/* =========================================================
+   BUNNY STREAM
+========================================================= */
+
+const BUNNY_HOST = "https://vz-02e10882-1ea.b-cdn.net";
+
+
+/* =========================================================
+   HERO VIDEOS
+========================================================= */
 
 const heroSlides = [
   {
-    video: "https://player.mediadelivery.net/play/733160/d655ca57-0720-4627-ab2b-9c200ad92544",
+    videoId: "d655ca57-0720-4627-ab2b-9c200ad92544",
     image: "/media/hero-01.jpg",
     eyebrow: "INTEGRATED INDUSTRIAL ENGINEERING",
     title: "ENGINEERING THE SYSTEMS BEHIND INDUSTRY."
   },
   {
-    video: "https://player.mediadelivery.net/play/733160/b5004eed-2608-40d6-8f4c-e6a9f3d5f20a",
+    videoId: "b5004eed-2608-40d6-8f4c-e6a9f3d5f20a",
     image: "/media/hero-02.jpg",
     eyebrow: "MECHANICAL ENGINEERING",
     title: "PRECISION THAT KEEPS PROCESSES MOVING."
   },
   {
-    video: "https://player.mediadelivery.net/play/733160/4ce4a52b-7200-430d-b68c-1f52c8ec48d4",
+    videoId: "4ce4a52b-7200-430d-b68c-1f52c8ec48d4",
     image: "/media/hero-03.jpg",
     eyebrow: "ELECTRICAL & INSTRUMENTATION",
     title: "CONTROL EVERY CRITICAL SIGNAL."
   },
   {
-    video: "https://player.mediadelivery.net/play/733160/f23c8448-d516-43f8-bdce-4973829f6fdd",
+    videoId: "f23c8448-d516-43f8-bdce-4973829f6fdd",
     image: "/media/hero-04.jpg",
     eyebrow: "EPC PROJECT DELIVERY",
     title: "FROM BLUEPRINT TO OPERATION."
   }
 ];
 
+
+/* =========================================================
+   SERVICE VIDEOS
+   Exact order provided
+========================================================= */
+
 const engineeringSections = [
   {
     number: "01",
-    video: "https://player.mediadelivery.net/play/733160/c7180fb9-df1b-4b23-8519-9dc68b4fbf1b",
+    videoId: "c7180fb9-df1b-4b23-8519-9dc68b4fbf1b",
     image: "/media/video-01.jpg",
     eyebrow: "ELECTRICAL & INSTRUMENTATION",
     title: "POWERING THE SYSTEM.",
@@ -48,7 +65,7 @@ const engineeringSections = [
   },
   {
     number: "02",
-    video: "https://player.mediadelivery.net/play/733160/1814ed5e-b16c-4807-94d1-0a5bc2a59e9f",
+    videoId: "1814ed5e-b16c-4807-94d1-0a5bc2a59e9f",
     image: "/media/video-02.jpg",
     eyebrow: "MECHANICAL ENGINEERING",
     title: "BUILT AROUND PERFORMANCE.",
@@ -57,7 +74,7 @@ const engineeringSections = [
   },
   {
     number: "03",
-    video: "https://player.mediadelivery.net/play/733160/ffb2cd54-51ba-4708-bdf6-24da650db8b0",
+    videoId: "ffb2cd54-51ba-4708-bdf6-24da650db8b0",
     image: "/media/video-03.jpg",
     eyebrow: "EPC CONTRACTS",
     title: "FROM CONCEPT TO COMMISSIONING.",
@@ -66,7 +83,7 @@ const engineeringSections = [
   },
   {
     number: "04",
-    video: "https://player.mediadelivery.net/play/733160/5d2ee4a6-3918-45b9-9c12-78ee6c2e16fc",
+    videoId: "5d2ee4a6-3918-45b9-9c12-78ee6c2e16fc",
     image: "/media/video-04.jpg",
     eyebrow: "DIGITAL & INDUSTRIAL TECHNOLOGY",
     title: "CONNECTING THE OPERATION.",
@@ -74,6 +91,11 @@ const engineeringSections = [
     button: "EXPLORE DIGITAL"
   }
 ];
+
+
+/* =========================================================
+   INDUSTRIES
+========================================================= */
 
 const industries = [
   ["01", "Oil & Gas"],
@@ -83,6 +105,11 @@ const industries = [
   ["05", "Food Processing"],
   ["06", "Solar Plants"]
 ];
+
+
+/* =========================================================
+   NAVBAR
+========================================================= */
 
 function Nav() {
   const [open, setOpen] = useState(false);
@@ -123,7 +150,13 @@ function Nav() {
         CONSPEK<span>/</span>
       </a>
 
-      <nav className={open ? "floating-links open" : "floating-links"}>
+      <nav
+        className={
+          open
+            ? "floating-links open"
+            : "floating-links"
+        }
+      >
         {links.map((item) => (
           <a
             key={item[0]}
@@ -148,11 +181,20 @@ function Nav() {
         onClick={() => setOpen(!open)}
         aria-label="Toggle navigation"
       >
-        {open ? <X size={18} /> : <Menu size={18} />}
+        {open ? (
+          <X size={18} />
+        ) : (
+          <Menu size={18} />
+        )}
       </button>
     </header>
   );
 }
+
+
+/* =========================================================
+   CUSTOM CURSOR
+========================================================= */
 
 function Cursor() {
   const ring = useRef(null);
@@ -186,39 +228,121 @@ function Cursor() {
 
   return (
     <>
-      <div className="cursor-d" ref={dot} />
-      <div className="cursor-r" ref={ring} />
+      <div
+        className="cursor-d"
+        ref={dot}
+      />
+
+      <div
+        className="cursor-r"
+        ref={ring}
+      />
     </>
   );
 }
 
+
+/* =========================================================
+   BUNNY HLS VIDEO
+========================================================= */
+
 function Video(props) {
-  const src = props.src;
+  const videoRef = useRef(null);
+
+  const videoId = props.videoId;
   const image = props.image;
   const className = props.className || "";
   const hero = props.hero || false;
+
+  useEffect(() => {
+    const video = videoRef.current;
+
+    if (!video || !videoId) return;
+
+    const hlsUrl =
+      BUNNY_HOST +
+      "/" +
+      videoId +
+      "/playlist.m3u8";
+
+    let hls = null;
+
+    if (Hls.isSupported()) {
+      hls = new Hls({
+        enableWorker: true,
+        lowLatencyMode: true,
+
+        maxBufferLength: hero ? 20 : 10,
+
+        backBufferLength: 10,
+
+        startLevel: -1
+      });
+
+      hls.loadSource(hlsUrl);
+      hls.attachMedia(video);
+
+      hls.on(
+        Hls.Events.MANIFEST_PARSED,
+        function () {
+          video.play().catch(() => {});
+        }
+      );
+    }
+
+    else if (
+      video.canPlayType(
+        "application/vnd.apple.mpegurl"
+      )
+    ) {
+      video.src = hlsUrl;
+
+      video.addEventListener(
+        "loadedmetadata",
+        function () {
+          video.play().catch(() => {});
+        }
+      );
+    }
+
+    return function () {
+      if (hls) {
+        hls.destroy();
+      }
+
+      video.pause();
+      video.removeAttribute("src");
+      video.load();
+    };
+  }, [videoId, hero]);
 
   return (
     <div
       className={"video " + className}
       style={{
-        backgroundImage: "url(" + image + ")"
+        backgroundImage:
+          "url(" + image + ")"
       }}
     >
       <video
+        ref={videoRef}
         autoPlay
         muted
         loop
         playsInline
         preload={hero ? "auto" : "none"}
         poster={image}
-        src={src}
       />
 
       <div className="grain" />
     </div>
   );
 }
+
+
+/* =========================================================
+   LAZY BUNNY HLS VIDEO
+========================================================= */
 
 function LazyVideo(props) {
   const ref = useRef(null);
@@ -227,21 +351,27 @@ function LazyVideo(props) {
   useEffect(() => {
     if (!ref.current) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          setLoaded(true);
-          observer.disconnect();
+    const observer =
+      new IntersectionObserver(
+        (entries) => {
+          if (
+            entries[0].isIntersecting
+          ) {
+            setLoaded(true);
+
+            observer.disconnect();
+          }
+        },
+        {
+          rootMargin: "800px 0px"
         }
-      },
-      {
-        rootMargin: "800px 0px"
-      }
-    );
+      );
 
     observer.observe(ref.current);
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, []);
 
   return (
@@ -249,18 +379,15 @@ function LazyVideo(props) {
       ref={ref}
       className="video"
       style={{
-        backgroundImage: "url(" + props.image + ")"
+        backgroundImage:
+          "url(" + props.image + ")"
       }}
     >
       {loaded && (
-        <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          poster={props.image}
-          src={props.src}
+        <Video
+          videoId={props.videoId}
+          image={props.image}
+          hero={false}
         />
       )}
 
@@ -269,12 +396,25 @@ function LazyVideo(props) {
   );
 }
 
+
+/* =========================================================
+   HERO
+========================================================= */
+
 function Hero() {
-  const [current, setCurrent] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
+  const [current, setCurrent] =
+    useState(0);
+
+  const [transitioning, setTransitioning] =
+    useState(false);
 
   function changeSlide(next) {
-    if (next === current || transitioning) return;
+    if (
+      next === current ||
+      transitioning
+    ) {
+      return;
+    }
 
     setTransitioning(true);
 
@@ -284,32 +424,62 @@ function Hero() {
     }, 650);
   }
 
-  useEffect(function () {
-    const timer = window.setInterval(function () {
-      const next = (current + 1) % heroSlides.length;
-      changeSlide(next);
-    }, 6500);
+  useEffect(
+    function () {
+      const timer =
+        window.setInterval(
+          function () {
+            const next =
+              (current + 1) %
+              heroSlides.length;
 
-    return function () {
-      window.clearInterval(timer);
-    };
-  }, [current, transitioning]);
+            changeSlide(next);
+          },
+          6500
+        );
 
-  const slide = heroSlides[current];
+      return function () {
+        window.clearInterval(timer);
+      };
+    },
+    [current, transitioning]
+  );
+
+  const slide =
+    heroSlides[current];
 
   return (
-    <section className="hero" id="top">
+    <section
+      className="hero"
+      id="top"
+    >
       <Video
-        src={slide.video}
+        videoId={slide.videoId}
         image={slide.image}
         hero={true}
       />
 
       <div className="hero-shade" />
 
-      <div className={"tiles " + (transitioning ? "flip" : "")}>
-        {Array.from({ length: 10 }).map(function (_, index) {
-          return <i key={index} style={{ "--i": index }} />;
+      <div
+        className={
+          "tiles " +
+          (transitioning
+            ? "flip"
+            : "")
+        }
+      >
+        {Array.from({
+          length: 10
+        }).map(function (_, index) {
+          return (
+            <i
+              key={index}
+              style={{
+                "--i": index
+              }}
+            />
+          );
         })}
       </div>
 
@@ -319,33 +489,56 @@ function Hero() {
           {slide.eyebrow}
         </div>
 
-        <h1 key={current}>{slide.title}</h1>
+        <h1 key={current}>
+          {slide.title}
+        </h1>
 
         <p>
-          Integrated engineering, procurement and construction
-          solutions for complex industrial environments.
+          Integrated engineering,
+          procurement and construction
+          solutions for complex
+          industrial environments.
         </p>
 
-        <a className="button" href="#services">
+        <a
+          className="button"
+          href="#services"
+        >
           Explore capabilities
           <ArrowUpRight size={16} />
         </a>
       </div>
 
       <div className="hero-bottom">
-        <span>CONSPEK / 0{current + 1}</span>
+        <span>
+          CONSPEK / 0
+          {current + 1}
+        </span>
 
         <div className="dots">
-          {heroSlides.map(function (_, index) {
-            return (
-              <button
-                key={index}
-                className={index === current ? "on" : ""}
-                onClick={function () { changeSlide(index); }}
-                aria-label={"Hero slide " + (index + 1)}
-              />
-            );
-          })}
+          {heroSlides.map(
+            function (_, index) {
+              return (
+                <button
+                  key={index}
+                  className={
+                    index === current
+                      ? "on"
+                      : ""
+                  }
+                  onClick={
+                    function () {
+                      changeSlide(index);
+                    }
+                  }
+                  aria-label={
+                    "Hero slide " +
+                    (index + 1)
+                  }
+                />
+              );
+            }
+          )}
         </div>
 
         <span className="scroll-label">
@@ -356,49 +549,85 @@ function Hero() {
     </section>
   );
 }
+
+
+/* =========================================================
+   INTRO + COUNTING STATS
+========================================================= */
+
 function Intro() {
-  const statsRef = useRef(null);
+  const statsRef =
+    useRef(null);
 
   useEffect(() => {
     if (!statsRef.current) return;
 
-    const counters = statsRef.current.querySelectorAll(".count");
+    const counters =
+      statsRef.current.querySelectorAll(
+        ".count"
+      );
 
-    counters.forEach((counter) => {
-      const target = Number(counter.getAttribute("data-target"));
-      const suffix = counter.getAttribute("data-suffix") || "";
+    counters.forEach(
+      (counter) => {
+        const target =
+          Number(
+            counter.getAttribute(
+              "data-target"
+            )
+          );
 
-      const obj = { value: 0 };
+        const suffix =
+          counter.getAttribute(
+            "data-suffix"
+          ) || "";
 
-      gsap.to(obj, {
-        value: target,
-        duration: 2.2,
-        delay: 0.2,
-        ease: "power2.out",
+        const obj = {
+          value: 0
+        };
 
-        scrollTrigger: {
-          trigger: statsRef.current,
-          start: "top 80%",
-          once: true
-        },
+        gsap.to(obj, {
+          value: target,
+          duration: 2.2,
+          delay: 0.2,
+          ease: "power2.out",
 
-        onUpdate: () => {
-          counter.textContent =
-            Math.floor(obj.value) + suffix;
-        },
+          scrollTrigger: {
+            trigger:
+              statsRef.current,
 
-        onComplete: () => {
-          counter.textContent = target + suffix;
-        }
-      });
-    });
+            start: "top 80%",
+
+            once: true
+          },
+
+          onUpdate: () => {
+            counter.textContent =
+              Math.floor(
+                obj.value
+              ) + suffix;
+          },
+
+          onComplete: () => {
+            counter.textContent =
+              target + suffix;
+          }
+        });
+      }
+    );
 
     return () => {
-      ScrollTrigger.getAll().forEach((trigger) => {
-        if (trigger.trigger === statsRef.current) {
-          trigger.kill();
-        }
-      });
+      ScrollTrigger
+        .getAll()
+        .forEach(
+          (trigger) => {
+            if (
+              trigger.trigger ===
+              statsRef.current
+            ) {
+              trigger.kill();
+            }
+          }
+        );
     };
   }, []);
 
@@ -414,18 +643,23 @@ function Intro() {
         <h2>
           THE ENGINEERING
           <br />
-          <em>BEHIND THE OPERATION.</em>
+          <em>
+            BEHIND THE OPERATION.
+          </em>
         </h2>
 
         <div>
 
           <p className="big">
-            We design the systems that make industry work.
+            We design the systems
+            that make industry work.
           </p>
 
           <p>
-            CONSPEK brings electrical, instrumentation, mechanical,
-            EPC and digital capabilities together around dependable
+            CONSPEK brings electrical,
+            instrumentation, mechanical,
+            EPC and digital capabilities
+            together around dependable
             industrial performance.
           </p>
 
@@ -434,11 +668,12 @@ function Intro() {
             href="#services"
           >
             Discover our capabilities
-            <ArrowUpRight size={15} />
+            <ArrowUpRight
+              size={15}
+            />
           </a>
 
         </div>
-
       </div>
 
       <div
@@ -489,27 +724,39 @@ function Intro() {
         </div>
 
       </div>
-
     </section>
   );
 }
+
+
+/* =========================================================
+   BIG CONSPEK TYPOGRAPHY
+========================================================= */
+
 function FeatureBand() {
   return (
     <section className="feature-band">
-      
+
       <div className="feature-text">
-        <div className="label">02 / THE PROCESS</div>
+
+        <div className="label">
+          02 / THE PROCESS
+        </div>
 
         <h2>
           WATCH
           <br />
-          <em>ENGINEERING MOVE.</em>
+          <em>
+            ENGINEERING MOVE.
+          </em>
         </h2>
 
         <p>
-          Real systems. Real processes. A closer look at
-          the environments our engineering is built for.
+          Real systems. Real processes.
+          A closer look at the environments
+          our engineering is built for.
         </p>
+
       </div>
 
       <div className="band-word">
@@ -520,101 +767,177 @@ function FeatureBand() {
   );
 }
 
+
+/* =========================================================
+   SERVICES INTRO
+========================================================= */
+
 function Services() {
   return (
-    <section className="section services" id="services">
+    <section
+      className="section services"
+      id="services"
+    >
       <div className="section-title">
+
         <div>
-          <div className="label">03 / CAPABILITIES</div>
+
+          <div className="label">
+            03 / CAPABILITIES
+          </div>
 
           <h2>
             BUILT TO
             <br />
             <em>PERFORM.</em>
           </h2>
+
         </div>
 
         <p>
-          Four core engineering disciplines,
-          presented through a simple visual story.
+          Four core engineering
+          disciplines, presented
+          through a simple visual story.
         </p>
+
       </div>
     </section>
   );
 }
 
-function EngineeringVideoSection(props) {
+
+/* =========================================================
+   ENGINEERING VIDEO SECTIONS
+========================================================= */
+
+function EngineeringVideoSection(
+  props
+) {
   const item = props.item;
   const reverse = props.reverse;
-  const sectionRef = useRef(null);
 
-  useEffect(function () {
-    if (!sectionRef.current) return;
+  const sectionRef =
+    useRef(null);
 
-    const animation = gsap.fromTo(
-      sectionRef.current,
-      { opacity: 0, y: 60 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: "power3.out",
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 82%",
-          once: true
-        }
-      }
-    );
+  useEffect(
+    function () {
+      if (!sectionRef.current)
+        return;
 
-    return function () {
-      animation.kill();
-    };
-  }, []);
+      const animation =
+        gsap.fromTo(
+          sectionRef.current,
+
+          {
+            opacity: 0,
+            y: 60
+          },
+
+          {
+            opacity: 1,
+            y: 0,
+            duration: 1,
+            ease: "power3.out",
+
+            scrollTrigger: {
+              trigger:
+                sectionRef.current,
+
+              start: "top 82%",
+
+              once: true
+            }
+          }
+        );
+
+      return function () {
+        animation.kill();
+      };
+    },
+    []
+  );
 
   return (
     <section
       ref={sectionRef}
-      className={"story " + (reverse ? "reverse" : "")}
-      id={"service-" + item.number}
+      className={
+        "story " +
+        (reverse
+          ? "reverse"
+          : "")
+      }
+      id={
+        "service-" +
+        item.number
+      }
     >
+
       <div className="story-video">
+
         <LazyVideo
-          src={item.video}
+          videoId={item.videoId}
           image={item.image}
         />
 
-        <div className="video-number">{item.number}</div>
+        <div className="video-number">
+          {item.number}
+        </div>
 
         <div className="video-label">
           CONSPEK / ENGINEERING SYSTEM
         </div>
+
       </div>
 
       <div className="story-copy">
+
         <div className="label">
-          {item.number} / {item.eyebrow}
+          {item.number} /{" "}
+          {item.eyebrow}
         </div>
 
-        <h2>{item.title}</h2>
+        <h2>
+          {item.title}
+        </h2>
 
-        <p>{item.text}</p>
+        <p>
+          {item.text}
+        </p>
 
-        <a className="line-link" href="#contact">
+        <a
+          className="line-link"
+          href="#contact"
+        >
           {item.button}
-          <ArrowUpRight size={15} />
+          <ArrowUpRight
+            size={15}
+          />
         </a>
+
       </div>
+
     </section>
   );
 }
 
+
+/* =========================================================
+   INDUSTRIES
+========================================================= */
+
 function Industries() {
   return (
-    <section className="industries section" id="industries">
-      <div className="label">08 / INDUSTRIES</div>
+    <section
+      className="industries section"
+      id="industries"
+    >
+
+      <div className="label">
+        08 / INDUSTRIES
+      </div>
 
       <div className="industry-head">
+
         <h2>
           WHERE WE
           <br />
@@ -622,25 +945,48 @@ function Industries() {
         </h2>
 
         <p>
-          From energy and process plants to food,
-          pharma and renewable infrastructure.
+          From energy and process
+          plants to food, pharma
+          and renewable infrastructure.
         </p>
+
       </div>
 
       <div className="industry-grid">
-        {industries.map(function (industry) {
-          return (
-            <div key={industry[1]}>
-              <span>{industry[0]}</span>
-              <b>{industry[1]}</b>
-              <ArrowUpRight size={17} />
-            </div>
-          );
-        })}
+
+        {industries.map(
+          function (industry) {
+            return (
+              <div
+                key={industry[1]}
+              >
+
+                <span>
+                  {industry[0]}
+                </span>
+
+                <b>
+                  {industry[1]}
+                </b>
+
+                <ArrowUpRight
+                  size={17}
+                />
+
+              </div>
+            );
+          }
+        )}
+
       </div>
     </section>
   );
 }
+
+
+/* =========================================================
+   ABOUT / DELIVERY
+========================================================= */
 
 function About() {
   const steps = [
@@ -652,103 +998,192 @@ function About() {
   ];
 
   return (
-    <section className="about section" id="about">
-      <div className="label">09 / DELIVERY</div>
+    <section
+      className="about section"
+      id="about"
+    >
+
+      <div className="label">
+        09 / DELIVERY
+      </div>
 
       <h2>
         FROM CONCEPT
         <br />
-        <em>TO COMMISSIONING.</em>
+        <em>
+          TO COMMISSIONING.
+        </em>
       </h2>
 
       <div className="steps">
-        {steps.map(function (step, index) {
-          return (
-            <div key={step}>
-              <span>0{index + 1}</span>
-              <b>{step}</b>
-              <p>
-                One accountable workflow built around
-                safety, quality and operational readiness.
-              </p>
-            </div>
-          );
-        })}
+
+        {steps.map(
+          function (
+            step,
+            index
+          ) {
+            return (
+              <div
+                key={step}
+              >
+
+                <span>
+                  0{index + 1}
+                </span>
+
+                <b>
+                  {step}
+                </b>
+
+                <p>
+                  One accountable
+                  workflow built around
+                  safety, quality and
+                  operational readiness.
+                </p>
+
+              </div>
+            );
+          }
+        )}
+
       </div>
+
     </section>
   );
 }
 
+
+/* =========================================================
+   CONTACT
+========================================================= */
+
 function Contact() {
   return (
-    <section className="contact" id="contact">
-      <div className="label">10 / NEXT</div>
+    <section
+      className="contact"
+      id="contact"
+    >
+
+      <div className="label">
+        10 / NEXT
+      </div>
 
       <h2>
         LET'S ENGINEER
         <br />
-        <em>WHAT'S NEXT.</em>
+        <em>
+          WHAT'S NEXT.
+        </em>
       </h2>
 
       <p>
-        Have a complex industrial requirement?
-        Let's turn it into a system that works.
+        Have a complex industrial
+        requirement? Let's turn it
+        into a system that works.
       </p>
 
-      <a className="button" href="mailto:info@conspek.com">
+      <a
+        className="button"
+        href="mailto:info@conspek.com"
+      >
         Start a project
-        <ArrowUpRight size={16} />
+        <ArrowUpRight
+          size={16}
+        />
       </a>
+
     </section>
   );
 }
 
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
 function Footer() {
   return (
     <footer>
+
       <div className="logo">
         CONSPEK<span>/</span>
       </div>
 
       <div className="foot-links">
-        <a href="#services">Services</a>
-        <a href="#industries">Industries</a>
-        <a href="#about">About</a>
-        <a href="#contact">Contact</a>
+
+        <a href="#services">
+          Services
+        </a>
+
+        <a href="#industries">
+          Industries
+        </a>
+
+        <a href="#about">
+          About
+        </a>
+
+        <a href="#contact">
+          Contact
+        </a>
+
       </div>
 
       <small>
-        © 2026 CONSPEK Engineering. All systems operational.
+        © 2026 CONSPEK Engineering.
+        All systems operational.
       </small>
+
     </footer>
   );
 }
+
+
+/* =========================================================
+   APP
+========================================================= */
 
 function App() {
   return (
     <>
       <Cursor />
+
       <Nav />
 
       <main>
+
         <Hero />
+
         <Intro />
+
         <FeatureBand />
+
         <Services />
 
-        {engineeringSections.map(function (item, index) {
-          return (
-            <EngineeringVideoSection
-              key={item.number}
-              item={item}
-              reverse={index % 2 === 1}
-            />
-          );
-        })}
+        {engineeringSections.map(
+          function (
+            item,
+            index
+          ) {
+            return (
+              <EngineeringVideoSection
+                key={item.number}
+                item={item}
+                reverse={
+                  index % 2 === 1
+                }
+              />
+            );
+          }
+        )}
 
         <Industries />
+
         <About />
+
         <Contact />
+
       </main>
 
       <Footer />
@@ -756,4 +1191,9 @@ function App() {
   );
 }
 
-createRoot(document.getElementById("root")).render(<App />);
+
+createRoot(
+  document.getElementById("root")
+).render(
+  <App />
+);
